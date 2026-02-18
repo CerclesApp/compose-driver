@@ -51,6 +51,8 @@ import io.ktor.server.routing.routing
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.withContext
 
@@ -85,6 +87,7 @@ fun startComposeDriverServer(
     port: Int = 8080,
     factory: ApplicationEngineFactory<*, *> = ApplicationEngineFactory,
     additionalModuleConfiguration: suspend Application.() -> Unit = {},
+    startMcp: Boolean = System.getProperty("compose.driver.mcp")?.toBoolean() ?: false,
     content: @Composable () -> Unit,
 ) {
     val navigationEventDispatcher = NavigationEventDispatcher()
@@ -108,25 +111,39 @@ fun startComposeDriverServer(
             }
         }
 
+        val onReset: (composableName: String?) -> Unit = { composableName ->
+            if (composableName != null) {
+                currentContent = fullyQualifiedComposable(composableName)
+            }
+            contentKey++
+            waitForIdle()
+        }
+
         embeddedServer(factory, port = port) {
                 configureDriverModule(
                     test = this@runUiTest,
                     runTestContext = runTestContext,
                     navigationEventDispatcher = navigationEventDispatcher,
-                    onReset = { composableName ->
-                        if (composableName != null) {
-                            currentContent = fullyQualifiedComposable(composableName)
-                        }
-                        contentKey++
-                        waitForIdle()
-                    },
+                    onReset = onReset,
                 )
 
                 additionalModuleConfiguration()
             }
             .start()
 
-        awaitCancellation()
+        coroutineScope {
+            if (startMcp) {
+                launch {
+                    runMcpServer(
+                        test = this@runUiTest,
+                        runTestContext = runTestContext,
+                        navigationEventDispatcher = navigationEventDispatcher,
+                        onReset = onReset,
+                    )
+                }
+            }
+            awaitCancellation()
+        }
     }
 }
 
@@ -287,12 +304,13 @@ private suspend fun RoutingContext.onNode(
     require(gifDurationMs in 0..5_000) { "gifDurationMs should be <= 5_000 and >= 0" }
 
     val timeBetweenFramesMs = 16L
-    val frames = generateFrames(test, gifDurationMs, timeBetweenFramesMs, f)
+    val frames = generateFrames(test, call.node(), gifDurationMs, timeBetweenFramesMs, f)
     respondGif(frames, timeBetweenFramesMs)
 }
 
-private suspend fun RoutingContext.generateFrames(
+internal suspend fun generateFrames(
     test: ComposeUiTest,
+    matcher: SemanticsMatcher,
     gifDurationMs: Int,
     timeBetweenFrames: Long,
     f: suspend ComposeUiTest.(SemanticsNodeInteraction) -> Unit,
@@ -306,7 +324,7 @@ private suspend fun RoutingContext.generateFrames(
 
     try {
         test.mainClock.autoAdvance = false
-        test.f(test.onNode(call.node()))
+        test.f(test.onNode(matcher))
 
         var t = 0L
         while (t <= gifDurationMs) {

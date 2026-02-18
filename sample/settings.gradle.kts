@@ -73,5 +73,3 @@ include(":android:lib")
 include(":desktop")
 
 include(":multiplatform")
-
-include(":mcp")

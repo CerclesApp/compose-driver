@@ -9,10 +9,7 @@ import kotlin.io.path.absolutePathString
 
 internal expect fun writePng(image: ImageBitmap, out: OutputStream)
 
-internal suspend fun RoutingContext.respondGif(
-    frames: List<ImageBitmap>,
-    timeBetweenFramesMs: Long,
-) {
+internal fun gifBytes(frames: List<ImageBitmap>, timeBetweenFramesMs: Long): ByteArray {
     val dir = Files.createTempDirectory("compose-driver-gif")
     try {
         frames.forEachIndexed { index, image ->
@@ -43,8 +40,16 @@ internal suspend fun RoutingContext.respondGif(
             "${cmd.first()} failed with exit code $exitCode: $errorOutput"
         }
 
-        call.respondStream(ContentType.Image.GIF) { Files.copy(outputGif, this) }
+        return Files.readAllBytes(outputGif)
     } finally {
         dir.toFile().deleteRecursively()
     }
+}
+
+internal suspend fun RoutingContext.respondGif(
+    frames: List<ImageBitmap>,
+    timeBetweenFramesMs: Long,
+) {
+    val bytes = gifBytes(frames, timeBetweenFramesMs)
+    call.respondStream(ContentType.Image.GIF) { write(bytes) }
 }

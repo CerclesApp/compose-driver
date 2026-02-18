@@ -44,17 +44,31 @@ have an [agent skill](.agent/skills/compose-driver/SKILL.md) that describes how 
 
 ### MCP Server (Recommended)
 
-The `:mcp` module exposes all compose-driver actions as MCP tools over stdio, so any MCP-compatible
-AI agent can discover and use them without knowing the raw HTTP API.
+Pass `-Dcompose.driver.mcp=true` to expose all compose-driver actions as MCP tools over stdio,
+so any MCP-compatible AI agent can discover and use them without knowing the raw HTTP API.
+
+**Desktop**
 
 ```bash
-./gradlew :mcp:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication
+./gradlew :compose-driver-desktop:run \
+  -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication \
+  -Dcompose.driver.mcp=true
+```
+
+**Android**
+
+```bash
+./gradlew :compose-driver-android:run \
+  -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.android.AndroidApplicationKt.AndroidApplication \
+  -Dcompose.driver.mcp=true
 ```
 
 To inspect the available tools interactively:
 
 ```bash
-npx @modelcontextprotocol/inspector ./gradlew :mcp:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication
+npx @modelcontextprotocol/inspector ./gradlew :compose-driver-desktop:run \
+  -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication \
+  -Dcompose.driver.mcp=true
 ```
 
 Point your MCP client (Claude Desktop, Cursor, etc.) at this command:
@@ -65,8 +79,9 @@ Point your MCP client (Claude Desktop, Cursor, etc.) at this command:
     "compose-driver": {
       "command": "./gradlew",
       "args": [
-        ":mcp:run",
-        "-Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication"
+        ":compose-driver-desktop:run",
+        "-Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication",
+        "-Dcompose.driver.mcp=true"
       ],
       "cwd": "/path/to/compose-driver/sample"
     }
@@ -74,17 +89,17 @@ Point your MCP client (Claude Desktop, Cursor, etc.) at this command:
 }
 ```
 
-### HTTP Server (Desktop)
+### HTTP Server Only (Desktop)
 
-Run the raw HTTP server on Desktop:
+Run the raw HTTP server on Desktop without MCP:
 
 ```bash
 ./gradlew :compose-driver-desktop:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication
 ```
 
-### HTTP Server (Android via Robolectric)
+### HTTP Server Only (Android via Robolectric)
 
-Run the raw HTTP server on Android:
+Run the raw HTTP server on Android without MCP:
 
 ```bash
 ./gradlew :compose-driver-android:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.android.AndroidApplicationKt.AndroidApplication

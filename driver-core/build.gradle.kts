@@ -27,6 +27,7 @@ kotlin {
                 implementation(libs.ktor.server.netty)
                 implementation(libs.ktor.server.call.logging)
                 implementation(libs.ktor.server.status.pages)
+                implementation(libs.mcp.kotlin.sdk)
             }
         }
     }

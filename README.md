@@ -82,13 +82,25 @@ composeDriver {
 To start the driver, use the generated `run` task. You must specify the Composable you want to drive
 using the `compose.driver.composable` system property.
 
-#### Option A — MCP Server (Recommended)
+#### MCP Server (Recommended)
 
-The `:driver-mcp` module wraps the HTTP server and exposes every action as a typed MCP tool over
-stdio. Point your MCP client at it and agents can discover all available tools automatically.
+Pass `-Dcompose.driver.mcp=true` to expose every action as a typed MCP tool over stdio alongside
+the HTTP server. Agents can discover all available tools automatically without knowing the HTTP API.
+
+**Desktop**
 
 ```bash
-./gradlew :driver-mcp:run -Dcompose.driver.composable=com.example.app.MainKt.MainScreen
+./gradlew :compose-driver-desktop:run \
+  -Dcompose.driver.composable=com.example.app.MainKt.MainScreen \
+  -Dcompose.driver.mcp=true
+```
+
+**Android**
+
+```bash
+./gradlew :compose-driver-android:run \
+  -Dcompose.driver.composable=com.example.app.MainKt.MainScreen \
+  -Dcompose.driver.mcp=true
 ```
 
 MCP client config (Claude Desktop, Cursor, etc.):
@@ -98,14 +110,18 @@ MCP client config (Claude Desktop, Cursor, etc.):
   "mcpServers": {
     "compose-driver": {
       "command": "./gradlew",
-      "args": [":driver-mcp:run", "-Dcompose.driver.composable=com.example.app.MainKt.MainScreen"],
+      "args": [
+        ":compose-driver-desktop:run",
+        "-Dcompose.driver.composable=com.example.app.MainKt.MainScreen",
+        "-Dcompose.driver.mcp=true"
+      ],
       "cwd": "/path/to/your/project"
     }
   }
 }
 ```
 
-#### Option B — Raw HTTP Server
+#### HTTP Server Only
 
 **Desktop**
 
