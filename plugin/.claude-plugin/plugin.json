@@ -1,0 +1,12 @@
+{
+  "name": "compose-driver",
+  "description": "Drive any Jetpack Compose UI from an AI agent. Provides a skill that teaches Claude how to start the MCP server and interact with Compose UIs via screenshots, clicks, text input, and more.",
+  "version": "0.5.0",
+  "author": {
+    "name": "Jordan Demeulenaere",
+    "url": "https://github.com/jdemeulenaere"
+  },
+  "homepage": "https://github.com/jdemeulenaere/compose-driver",
+  "repository": "https://github.com/jdemeulenaere/compose-driver",
+  "license": "Apache-2.0"
+}
