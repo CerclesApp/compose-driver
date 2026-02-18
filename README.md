@@ -14,7 +14,8 @@ AI coding tool.
 - **Cross-Platform**: Supports Android and JVM (Desktop) Compose.
 - **Zero Code Changes**: Integrates via a Gradle Settings plugin. No production code changes
   required.
-- **AI-Native API**: REST-like API designed for agents to "see" (screenshot/tree) and "act"
+- **MCP Server**: Exposes all actions as typed [MCP](https://modelcontextprotocol.io) tools — agents discover and call them without knowing the HTTP API.
+- **AI-Native API**: REST-like HTTP API designed for agents to "see" (screenshot/tree) and "act"
   (click/swipe).
 - **Observability**: Record GIFs of interactions and capture screenshots on demand.
 - **Lightning Fast**: Uses virtual clock time on the host, executing complex flows in tens of
@@ -80,6 +81,31 @@ composeDriver {
 
 To start the driver, use the generated `run` task. You must specify the Composable you want to drive
 using the `compose.driver.composable` system property.
+
+#### Option A — MCP Server (Recommended)
+
+The `:driver-mcp` module wraps the HTTP server and exposes every action as a typed MCP tool over
+stdio. Point your MCP client at it and agents can discover all available tools automatically.
+
+```bash
+./gradlew :driver-mcp:run -Dcompose.driver.composable=com.example.app.MainKt.MainScreen
+```
+
+MCP client config (Claude Desktop, Cursor, etc.):
+
+```json
+{
+  "mcpServers": {
+    "compose-driver": {
+      "command": "./gradlew",
+      "args": [":driver-mcp:run", "-Dcompose.driver.composable=com.example.app.MainKt.MainScreen"],
+      "cwd": "/path/to/your/project"
+    }
+  }
+}
+```
+
+#### Option B — Raw HTTP Server
 
 **Desktop**
 

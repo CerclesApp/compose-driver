@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-Compose Driver enables AI agents to interact with Jetpack Compose UIs (Android and Desktop) via HTTP. It wraps a Composable in a `ComposeUiTest` harness and exposes a Ktor server on port 8080 that translates HTTP requests into UI test actions.
+Compose Driver enables AI agents to interact with Jetpack Compose UIs (Android and Desktop) via HTTP and MCP. It wraps a Composable in a `ComposeUiTest` harness and exposes a Ktor server on port 8080 that translates HTTP requests into UI test actions. An MCP server layer (`driver-mcp`) wraps this HTTP server and exposes all actions as typed MCP tools over stdio.
 
 ## Build Commands
 
@@ -12,6 +12,7 @@ Compose Driver enables AI agents to interact with Jetpack Compose UIs (Android a
 # Build the library and plugin
 ./gradlew :driver-core:build
 ./gradlew :driver-plugin:build
+./gradlew :driver-mcp:build
 
 # Build everything
 ./gradlew build
@@ -19,7 +20,10 @@ Compose Driver enables AI agents to interact with Jetpack Compose UIs (Android a
 # Publish to local Maven (needed when testing sample with SNAPSHOT version)
 ./gradlew publishToMavenLocal
 
-# Run sample on Desktop (from repo root or sample/)
+# Run sample via MCP server on Desktop (recommended)
+cd sample && ./gradlew :mcp:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication
+
+# Run sample via raw HTTP server on Desktop
 cd sample && ./gradlew :compose-driver-desktop:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication
 
 # Run sample on Android via Robolectric
@@ -30,7 +34,7 @@ Gradle configuration cache (`org.gradle.configuration-cache=true`) and build cac
 
 ## Architecture
 
-The project has two publishable modules and a sample:
+The project has three modules and a sample:
 
 ### `:driver-core` (KMP Library)
 Targets JVM and Android. Published to Maven Central as `io.github.jdemeulenaere:compose-driver`.
@@ -61,6 +65,13 @@ Key files:
 #### SNAPSHOT vs release dependency
 In `driverDependency()`: SNAPSHOT versions use `project(":compose-driver:driver-core")` (composite build); release versions use the Maven coordinate string.
 
+### `:driver-mcp` (JVM Application)
+A pure-JVM module (not published) that starts the HTTP server from `:driver-core` in a background thread, then serves all compose-driver actions as MCP tools over stdio using the [Kotlin MCP SDK](https://github.com/modelcontextprotocol/kotlin-sdk) (`io.modelcontextprotocol:kotlin-sdk`).
+
+Key files:
+- `Main.kt` — entry point: starts `startComposeDriverServer()` on a daemon thread, polls `/status` until ready, then calls `runMcpServer()`.
+- `McpServer.kt` — registers all 19 HTTP endpoints as MCP tools via `Server.addTool()`. Each tool builds a query string from its arguments and delegates to `GET http://localhost:8080/<endpoint>`. Screenshots return `ImageContent` (base64 PNG); GIFs return `ImageContent` (base64 GIF); all other responses return `TextContent`.
+
 ## Key System Properties
 
 | Property | Used by | Description |
@@ -77,3 +88,5 @@ The current version is in `gradle.properties` as `compose.driver.version`. The p
 ## Sample Project
 
 `sample/` is a standalone Gradle project that uses the plugin. Its `settings.gradle.kts` does `includeBuild("../")` when the version is a SNAPSHOT, so local changes to the plugin are picked up automatically. Set `compose.driver.local=true` in `sample/gradle.properties` to pull `:driver-core` from `mavenLocal()` instead.
+
+The sample includes a `:mcp` subproject (`sample/mcp/build.gradle.kts`) that demonstrates the MCP server: it depends on `project(":compose-driver:driver-mcp")` (via the composite build) and `projects.desktop` to bring the sample composable onto the classpath.
