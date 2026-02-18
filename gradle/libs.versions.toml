@@ -15,6 +15,7 @@ jetbrainsKotlinJvm = "2.3.10"
 gradlePluginPublish = "2.0.0"
 slf4j = "2.0.17"
 vanniktechMavenPublish = "0.36.0"
+mcpKotlinSdk = "0.8.3"
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -29,6 +30,7 @@ ktor-server-core = { group = "io.ktor", name = "ktor-server-core", version.ref =
 ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty", version.ref = "ktor" }
 ktor-server-status-pages = { group = "io.ktor", name = "ktor-server-status-pages", version.ref = "ktor" }
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+mcp-kotlin-sdk = { group = "io.modelcontextprotocol", name = "kotlin-sdk", version.ref = "mcpKotlinSdk" }
 androidx-navigation-event = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationEvent" }
 
 [plugins]
