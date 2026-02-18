@@ -13,13 +13,39 @@ local server that translates HTTP requests into `ComposeUiTest` actions.
 
 ## Running the Driver
 
-The driver must be running for the agent to interact with the UI. Before starting the driver,
-**always ensure previous instances are killed** to avoid port conflicts (the server uses port 8080).
+The driver must be running for the agent to interact with the UI.
 
-* **Server Address:** `http://localhost:8080`
 * **Target:** `compose.driver.composable` must be the fully qualified name of the Composable
   function (e.g., `package.FileKt.ComposableName`).
-* **Wait for Ready:** After starting the command, poll `GET /status` until it returns "ok".
+
+### Option A — MCP Server (Recommended)
+
+The `:mcp` module exposes all actions as typed MCP tools. Run it as an MCP server via stdio —
+your MCP client will start it automatically:
+
+```json
+{
+  "mcpServers": {
+    "compose-driver": {
+      "command": "./gradlew",
+      "args": [
+        ":mcp:run",
+        "-Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication"
+      ],
+      "cwd": "<path-to-sample>"
+    }
+  }
+}
+```
+
+When using the MCP server, all tools below are available directly — no HTTP calls needed.
+
+### Option B — Raw HTTP Server
+
+Before starting the HTTP server, **always ensure previous instances are killed** to avoid port
+conflicts (the server uses port 8080). **Wait for Ready:** poll `GET /status` until it returns "ok".
+
+* **Server Address:** `http://localhost:8080`
 
 **Desktop (Recommended for speed for JVM & Multiplatform apps):**
 
