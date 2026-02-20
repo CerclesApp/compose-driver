@@ -4,17 +4,18 @@ android-compileSdk = "36"
 android-minSdk = "26"
 androidxActivity = "1.12.3"
 androidxLintGradle = "1.0.0-alpha05"
-composeMultiplatform = "1.10.0"
+composeMultiplatform = "1.10.1"
 junit = "4.13.2"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 material3 = "1.10.0-alpha05"
 ktor = "3.4.0"
 navigationEvent = "1.0.0"
 robolectric = "4.16.1"
-jetbrainsKotlinJvm = "2.3.0"
+jetbrainsKotlinJvm = "2.3.10"
 gradlePluginPublish = "2.0.0"
 slf4j = "2.0.17"
 vanniktechMavenPublish = "0.36.0"
+mcpKotlinSdk = "0.8.3"
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -27,8 +28,10 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 ktor-server-call-logging = { group = "io.ktor", name = "ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-core = { group = "io.ktor", name = "ktor-server-core", version.ref = "ktor" }
 ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty", version.ref = "ktor" }
+ktor-server-sse = { group = "io.ktor", name = "ktor-server-sse", version.ref = "ktor" }
 ktor-server-status-pages = { group = "io.ktor", name = "ktor-server-status-pages", version.ref = "ktor" }
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+mcp-kotlin-sdk = { group = "io.modelcontextprotocol", name = "kotlin-sdk", version.ref = "mcpKotlinSdk" }
 androidx-navigation-event = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationEvent" }
 
 [plugins]

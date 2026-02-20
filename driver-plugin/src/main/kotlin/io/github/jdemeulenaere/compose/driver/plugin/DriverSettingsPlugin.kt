@@ -139,6 +139,7 @@ private fun addDependencies(
 }
 
 private const val COMPOSABLE_PROPERTY = "compose.driver.composable"
+private const val MCP_PROPERTY = "compose.driver.mcp"
 
 private fun driverDependency(version: String): String {
     return if (version.endsWith("-SNAPSHOT")) {
@@ -215,9 +216,12 @@ private fun androidBuildFile(
             val testDebugUnitTest =
                 tasks.named<Test>("testDebugUnitTest") {
                     systemProperty("compose.driver.enabled", "true")
-                    
-                    val prop = "$$COMPOSABLE_PROPERTY"
-                    System.getProperty(prop)?.let { systemProperty(prop, it) }
+
+                    val composableProp = "$$COMPOSABLE_PROPERTY"
+                    System.getProperty(composableProp)?.let { systemProperty(composableProp, it) }
+
+                    val mcpProp = "$$MCP_PROPERTY"
+                    System.getProperty(mcpProp)?.let { systemProperty(mcpProp, it) }
                 }
             tasks.register("run") { dependsOn(testDebugUnitTest) }
         }
@@ -247,9 +251,12 @@ private fun desktopBuildFile(
 
     // Forward the configurations to the `run` task.
     tasks.named<JavaExec>("run") {
-        val prop = "$COMPOSABLE_PROPERTY"
-        System.getProperty(prop)?.let { systemProperty(prop, it) }
-        
+        val composableProp = "$COMPOSABLE_PROPERTY"
+        System.getProperty(composableProp)?.let { systemProperty(composableProp, it) }
+
+        val mcpProp = "$MCP_PROPERTY"
+        System.getProperty(mcpProp)?.let { systemProperty(mcpProp, it) }
+
         ${width?.let { "systemProperty(\"compose.driver.desktop.window.width\", $it)" } ?: ""}
         ${height?.let { "systemProperty(\"compose.driver.desktop.window.height\", $it)" } ?: ""}
         ${density?.let { "systemProperty(\"compose.driver.desktop.window.density\", ${it}f)" } ?: ""}

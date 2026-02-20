@@ -34,7 +34,7 @@ adb shell am start -n io.github.jdemeulenaere.compose.driver.sample.android.app/
 
 ## Running the Compose Driver
 
-The Compose Driver plugin automatically generated subprojects that depend on `:android:lib`,
+The Compose Driver plugin automatically generates subprojects that depend on `:android:lib`,
 `:desktop` and `:multiplatform`.
 
 > [!NOTE]
@@ -42,17 +42,50 @@ The Compose Driver plugin automatically generated subprojects that depend on `:a
 > pinging the endpoints in the browser is a fun way to see how (quickly) it works. **Make sure to
 have an [agent skill](.agent/skills/compose-driver/SKILL.md) that describes how to use it!**
 
-### Desktop
+### MCP Server (Recommended)
 
-Run the sample on Desktop:
+Pass `-Dcompose.driver.mcp=true` to expose all compose-driver actions as MCP tools over HTTP (SSE)
+at `/mcp`, so any MCP-compatible AI agent can discover and use them without knowing the raw HTTP API.
+
+**Desktop**
+
+```bash
+./gradlew :compose-driver-desktop:run \
+  -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication \
+  -Dcompose.driver.mcp=true
+```
+
+**Android**
+
+```bash
+./gradlew :compose-driver-android:run \
+  -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.android.AndroidApplicationKt.AndroidApplication \
+  -Dcompose.driver.mcp=true
+```
+
+Point your MCP client (Claude Desktop, Cursor, etc.) at this URL:
+
+```json
+{
+  "mcpServers": {
+    "compose-driver": {
+      "url": "http://localhost:8080/mcp"
+    }
+  }
+}
+```
+
+### HTTP Server Only (Desktop)
+
+Run the raw HTTP server on Desktop without MCP:
 
 ```bash
 ./gradlew :compose-driver-desktop:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication
 ```
 
-### Android
+### HTTP Server Only (Android via Robolectric)
 
-Run the sample on Android (via Robolectric):
+Run the raw HTTP server on Android without MCP:
 
 ```bash
 ./gradlew :compose-driver-android:run -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.android.AndroidApplicationKt.AndroidApplication
@@ -60,8 +93,8 @@ Run the sample on Android (via Robolectric):
 
 ## Interacting with the Driver
 
-Once the driver is running (default port `8080`), you can interact with it using HTTP requests in
-your browser or using `curl`.
+Once the HTTP server is running (default port `8080`), you can interact with it using HTTP requests
+in your browser or using `curl`.
 
 See the full API in [../README.md](../README.md).
 

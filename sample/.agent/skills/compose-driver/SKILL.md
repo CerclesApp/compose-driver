@@ -13,13 +13,35 @@ local server that translates HTTP requests into `ComposeUiTest` actions.
 
 ## Running the Driver
 
-The driver must be running for the agent to interact with the UI. Before starting the driver,
-**always ensure previous instances are killed** to avoid port conflicts (the server uses port 8080).
+The driver must be running for the agent to interact with the UI.
 
-* **Server Address:** `http://localhost:8080`
 * **Target:** `compose.driver.composable` must be the fully qualified name of the Composable
   function (e.g., `package.FileKt.ComposableName`).
-* **Wait for Ready:** After starting the command, poll `GET /status` until it returns "ok".
+
+### Option A — MCP Server (Recommended)
+
+The MCP server exposes all actions as typed MCP tools over HTTP (SSE) at `/mcp`.
+Your MCP client should be configured to use this URL:
+
+```json
+{
+  "mcpServers": {
+    "compose-driver": {
+      "url": "http://localhost:8080/mcp"
+    }
+  }
+}
+```
+
+When using the MCP server, all tools below are available directly — no manual HTTP calls needed.
+The driver must be started with `-Dcompose.driver.mcp=true`.
+
+### Option B — Raw HTTP Server
+
+Before starting the HTTP server, **always ensure previous instances are killed** to avoid port
+conflicts (the server uses port 8080). **Wait for Ready:** poll `GET /status` until it returns "ok".
+
+* **Server Address:** `http://localhost:8080`
 
 **Desktop (Recommended for speed for JVM & Multiplatform apps):**
 
