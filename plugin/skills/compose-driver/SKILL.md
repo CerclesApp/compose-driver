@@ -45,19 +45,24 @@ Example: `fun MyScreen()` in `com/example/ui/Screen.kt` with package `com.exampl
 
 ### 3. Start the MCP server
 
-The MCP server starts the Compose UI in a test harness and exposes all actions as tools.
-It is already wired to Claude Code via the project's `.mcp.json` or the user's MCP config.
-If it is not yet configured, add it:
+The MCP server starts the Compose UI in a test harness and exposes all actions as tools
+over HTTP (SSE) at `/mcp`. It is already wired to Claude Code via the project's `.mcp.json`
+or the user's MCP config. If it is not yet configured, add it:
 
 ```bash
-claude mcp add --scope project --transport stdio compose-driver \
-  -- ./gradlew :driver-mcp:run \
-  -Dcompose.driver.composable=<fully.qualified.ComposableName>
+claude mcp add --scope project --transport sse compose-driver \
+  http://localhost:8080/mcp
 ```
 
-For the sample project use `:mcp:run` instead of `:driver-mcp:run`.
+First, start the driver with MCP enabled:
 
-After adding the server, restart Claude Code and verify with `/mcp` that `compose-driver` appears.
+```bash
+./gradlew :compose-driver-desktop:run \
+  -Dcompose.driver.composable=<fully.qualified.ComposableName> \
+  -Dcompose.driver.mcp=true
+```
+
+After starting the driver and adding the server, verify with `/mcp` that `compose-driver` appears.
 
 ### 4. Alternatively — Raw HTTP server (no MCP)
 

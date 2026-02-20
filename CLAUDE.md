@@ -46,8 +46,8 @@ The project has two modules and a sample:
 Targets JVM and Android. Published to Maven Central as `io.github.jdemeulenaere:compose-driver`.
 
 Key files:
-- `ComposeDriver.kt` — `startComposeDriverServer()` entry point. Sets up the `ComposeUiTest` harness, starts the Ktor/Netty HTTP server, and wires all routes to `ComposeUiTest` actions. When `compose.driver.mcp=true` (or `startMcp=true`), also launches the MCP server in a coroutine alongside the HTTP server.
-- `McpServer.kt` — `runMcpServer()` registers all 19 tools via `Server.addTool()`. Each tool calls `ComposeUiTest` actions directly (no HTTP round-trip). Screenshots return `ImageContent` (base64 PNG); GIFs return `ImageContent` (base64 GIF); all other responses return `TextContent`. Uses `StdioServerTransport` over `System.in`/`System.out`.
+- `ComposeDriver.kt` — `startComposeDriverServer()` entry point. Sets up the `ComposeUiTest` harness, starts the Ktor/Netty HTTP server, and wires all routes to `ComposeUiTest` actions. When `compose.driver.mcp=true` (or `startMcp=true`), also installs the MCP server as a Ktor module.
+- `McpServer.kt` — `installMcpServer()` registers all 19 tools via `Server.addTool()`. Each tool calls `ComposeUiTest` actions directly (no HTTP round-trip). Screenshots return `ImageContent` (base64 PNG); GIFs return `ImageContent` (base64 GIF); all other responses return `TextContent`. Uses `StreamableHttpServerTransport` over Ktor routing (endpoint: `/mcp`).
 - `RunUiTest.kt` — `expect fun runUiTest(...)`. JVM actual uses `runSkikoComposeUiTest`; Android actual uses the Android Compose test runner.
 - `ComposeReflection.kt` — Resolves a `@Composable` by fully qualified name via reflection, handling the Compose compiler's transformed signature (`$composer`, `$changed`, `$default` parameters).
 - `GifEncoder.kt` / `GifEncoder.*.kt` — GIF recording by capturing frames during clock-advanced test time, then delegating to `ffmpeg`. `gifBytes()` returns the raw GIF bytes; `respondGif()` streams them as an HTTP response.

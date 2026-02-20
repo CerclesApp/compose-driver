@@ -20,25 +20,21 @@ The driver must be running for the agent to interact with the UI.
 
 ### Option A — MCP Server (Recommended)
 
-The `:mcp` module exposes all actions as typed MCP tools. Run it as an MCP server via stdio —
-your MCP client will start it automatically:
+The MCP server exposes all actions as typed MCP tools over HTTP (SSE) at `/mcp`.
+Your MCP client should be configured to use this URL:
 
 ```json
 {
   "mcpServers": {
     "compose-driver": {
-      "command": "./gradlew",
-      "args": [
-        ":mcp:run",
-        "-Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication"
-      ],
-      "cwd": "<path-to-sample>"
+      "url": "http://localhost:8080/mcp"
     }
   }
 }
 ```
 
-When using the MCP server, all tools below are available directly — no HTTP calls needed.
+When using the MCP server, all tools below are available directly — no manual HTTP calls needed.
+The driver must be started with `-Dcompose.driver.mcp=true`.
 
 ### Option B — Raw HTTP Server
 

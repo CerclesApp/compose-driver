@@ -26,9 +26,10 @@ import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.navigationevent.DirectNavigationEventInput
 import androidx.navigationevent.NavigationEventDispatcher
+import io.ktor.server.routing.Routing
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import io.modelcontextprotocol.kotlin.sdk.server.mcp
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
@@ -41,11 +42,7 @@ import java.util.Properties
 import kotlin.coroutines.CoroutineContext
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
-import kotlinx.io.asSink
-import kotlinx.io.asSource
-import kotlinx.io.buffered
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.JsonPrimitive
@@ -58,30 +55,24 @@ private val emptyJsonObject = JsonObject(emptyMap())
 // arguments is nullable in the Kotlin SDK despite the MCP spec requiring it
 private val CallToolRequest.args: JsonObject get() = arguments ?: emptyJsonObject
 
-internal suspend fun runMcpServer(
+internal fun Routing.installMcpServer(
     test: ComposeUiTest,
     runTestContext: CoroutineContext,
     navigationEventDispatcher: NavigationEventDispatcher,
     onReset: (composableName: String?) -> Unit,
 ) {
-    val server = Server(
-        serverInfo = Implementation(name = "compose-driver", version = composeDriverVersion()),
-        options = ServerOptions(
-            capabilities = ServerCapabilities(tools = ServerCapabilities.Tools()),
-        ),
-    )
+    val version = composeDriverVersion()
+    mcp("/mcp") {
+        val server = Server(
+            serverInfo = Implementation(name = "compose-driver", version = version),
+            options = ServerOptions(
+                capabilities = ServerCapabilities(tools = ServerCapabilities.Tools()),
+            ),
+        )
 
-    registerMcpTools(server, test, runTestContext, navigationEventDispatcher, onReset)
-
-    val transport = StdioServerTransport(
-        inputStream = System.`in`.asSource().buffered(),
-        outputStream = System.out.asSink().buffered(),
-    )
-
-    server.createSession(transport)
-    val done = Job()
-    server.onClose { done.complete() }
-    done.join()
+        registerMcpTools(server, test, runTestContext, navigationEventDispatcher, onReset)
+        server
+    }
 }
 
 private fun composeDriverVersion(): String {

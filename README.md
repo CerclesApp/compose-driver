@@ -84,8 +84,9 @@ using the `compose.driver.composable` system property.
 
 #### MCP Server (Recommended)
 
-Pass `-Dcompose.driver.mcp=true` to expose every action as a typed MCP tool over stdio alongside
-the HTTP server. Agents can discover all available tools automatically without knowing the HTTP API.
+Pass `-Dcompose.driver.mcp=true` to expose every action as a typed MCP tool over HTTP (SSE)
+alongside the raw HTTP server. AI agents can discover and call these tools via the `/mcp`
+endpoint.
 
 **Desktop**
 
@@ -109,13 +110,7 @@ MCP client config (Claude Desktop, Cursor, etc.):
 {
   "mcpServers": {
     "compose-driver": {
-      "command": "./gradlew",
-      "args": [
-        ":compose-driver-desktop:run",
-        "-Dcompose.driver.composable=com.example.app.MainKt.MainScreen",
-        "-Dcompose.driver.mcp=true"
-      ],
-      "cwd": "/path/to/your/project"
+      "url": "http://localhost:8080/mcp"
     }
   }
 }

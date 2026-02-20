@@ -51,8 +51,6 @@ import io.ktor.server.routing.routing
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.withContext
 
@@ -125,25 +123,14 @@ fun startComposeDriverServer(
                     runTestContext = runTestContext,
                     navigationEventDispatcher = navigationEventDispatcher,
                     onReset = onReset,
+                    startMcp = startMcp,
                 )
 
                 additionalModuleConfiguration()
             }
             .start()
 
-        coroutineScope {
-            if (startMcp) {
-                launch {
-                    runMcpServer(
-                        test = this@runUiTest,
-                        runTestContext = runTestContext,
-                        navigationEventDispatcher = navigationEventDispatcher,
-                        onReset = onReset,
-                    )
-                }
-            }
-            awaitCancellation()
-        }
+        awaitCancellation()
     }
 }
 
@@ -152,6 +139,7 @@ private fun Application.configureDriverModule(
     runTestContext: CoroutineContext,
     navigationEventDispatcher: NavigationEventDispatcher,
     onReset: (composableName: String?) -> Unit,
+    startMcp: Boolean,
 ) {
     install(StatusPages) {
         exception<IllegalArgumentException> { call, cause ->
@@ -183,6 +171,10 @@ private fun Application.configureDriverModule(
 
     // Use GET so that we can manually test the endpoint directly in the browser.
     routing {
+        if (startMcp) {
+            installMcpServer(test, runTestContext, navigationEventDispatcher, onReset)
+        }
+
         get("/status") { ok() }
         get("/reset") {
             val composableName = call.optionalParam("composable")

@@ -44,8 +44,8 @@ have an [agent skill](.agent/skills/compose-driver/SKILL.md) that describes how 
 
 ### MCP Server (Recommended)
 
-Pass `-Dcompose.driver.mcp=true` to expose all compose-driver actions as MCP tools over stdio,
-so any MCP-compatible AI agent can discover and use them without knowing the raw HTTP API.
+Pass `-Dcompose.driver.mcp=true` to expose all compose-driver actions as MCP tools over HTTP (SSE)
+at `/mcp`, so any MCP-compatible AI agent can discover and use them without knowing the raw HTTP API.
 
 **Desktop**
 
@@ -63,27 +63,13 @@ so any MCP-compatible AI agent can discover and use them without knowing the raw
   -Dcompose.driver.mcp=true
 ```
 
-To inspect the available tools interactively:
-
-```bash
-npx @modelcontextprotocol/inspector ./gradlew :compose-driver-desktop:run \
-  -Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication \
-  -Dcompose.driver.mcp=true
-```
-
-Point your MCP client (Claude Desktop, Cursor, etc.) at this command:
+Point your MCP client (Claude Desktop, Cursor, etc.) at this URL:
 
 ```json
 {
   "mcpServers": {
     "compose-driver": {
-      "command": "./gradlew",
-      "args": [
-        ":compose-driver-desktop:run",
-        "-Dcompose.driver.composable=io.github.jdemeulenaere.compose.driver.sample.desktop.DesktopApplicationKt.DesktopApplication",
-        "-Dcompose.driver.mcp=true"
-      ],
-      "cwd": "/path/to/compose-driver/sample"
+      "url": "http://localhost:8080/mcp"
     }
   }
 }

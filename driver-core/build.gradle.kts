@@ -25,6 +25,7 @@ kotlin {
                 implementation(libs.compose.ui.test.junit4)
                 implementation(libs.ktor.server.core)
                 implementation(libs.ktor.server.netty)
+                implementation(libs.ktor.server.sse)
                 implementation(libs.ktor.server.call.logging)
                 implementation(libs.ktor.server.status.pages)
                 implementation(libs.mcp.kotlin.sdk)
